@@ -1,4 +1,8 @@
+# From the root of the project 
+ uvicorn app.main:app --reload
+
 Digital Record-Keeping & Compliance
+# Assessment folder 
 # Module 1 - Risk Self-Assessment module.
 - Here we are collecting the data and store it in db then analyze the rist  and provide the insight of it .
 # Endpoint 1
@@ -41,7 +45,9 @@ http://127.0.0.1:8000/assessment/category4
   "is_disposal_approved": false,
   "is_waste_contained": true
 }
-# Module 2 Digital Record-Keeping and Compliance Tracking Module.
+
+# Compilence folder 
+# Module 2 Digital Record-Keeping and Compliance Tracking Module. 
 # Endpoint 1
 http://127.0.0.1:8000/compliance/log/visitor
 - Payload
@@ -68,3 +74,26 @@ POST http://127.0.0.1:8000//compliance/log/task-completion
   "farm_id": "FARM_XYZ_999",
   "details": "This will fail."
 }
+
+# Milk Egg calculation for animal
+http://127.0.0.1:8000/nutrition/calculate?lang={language_code}
+
+- The language code 
+en for English
+hi for Hindi
+pa for Punjabi
+ta for Tamil
+
+
+- Payload  
+{
+  "animal_type": "गाय",
+  "weight_kg": 450,
+  "age_months": 36,
+  "milk_yield_liters_per_day": 10
+} 
+
+As of now the payload is 50/multilingual .
+
+
+# Breeding & Reproduction Cycle Management
