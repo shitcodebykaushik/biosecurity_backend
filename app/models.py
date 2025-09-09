@@ -36,3 +36,12 @@ class ActivityLog(Base):
     
     # A text field to store details, like a visitor's name or a task description
     details = Column(Text, nullable=False)
+    
+    
+    
+class IDCounter(Base):
+    __tablename__ = "id_counters"
+    
+    # Animal type will be the primary key (e.g., 'COW', 'BUFFALO')
+    animal_type = Column(String, primary_key=True, index=True)
+    last_id = Column(Integer, default=0)

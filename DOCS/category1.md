@@ -96,4 +96,5 @@ ta for Tamil
 As of now the payload is 50/multilingual .
 
 
-# Breeding & Reproduction Cycle Management
+# Breeding & Reproduction Cycle Management (Once we are done with the AI then only we can proceed with this )
+- Here we have unique id of every animal which will keep track of all the animals .
