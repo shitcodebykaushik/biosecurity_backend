@@ -4,9 +4,8 @@ from sqlalchemy.orm import Session
 from .. import models
 from . import schemas
 
-# --- NEW SCORING LOGIC (PART 1: WEIGHTS) ---
+# --- SCORING LOGIC (WEIGHTS) ---
 # We define how many risk points each "bad" answer (False) is worth.
-# Critical risks like disposal and fencing are worth more.
 RISK_WEIGHTS = {
     # Category 1
     "has_fence": 10,
@@ -22,7 +21,7 @@ RISK_WEIGHTS = {
     "is_water_source_safe": 10,
     "is_equipment_shared": 15,
     # Category 4
-    "is_disposal_approved": 20, # This is a very high risk
+    "is_disposal_approved": 20,
     "is_waste_contained": 10,
 }
 
@@ -36,13 +35,52 @@ QUESTION_TO_CATEGORY = {
     "is_disposal_approved": "Waste & Mortality Disposal", "is_waste_contained": "Waste & Mortality Disposal"
 }
 
+# --- CATEGORY 1 SAVE FUNCTION ---
+def save_category1_responses(db: Session, responses: schemas.AssessmentCategory1):
+    db_items = [
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="has_fence", answer=responses.has_fence),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="has_locked_gate", answer=responses.has_locked_gate),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="has_disinfectant_bath", answer=responses.has_disinfectant_bath),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="uses_visitor_log", answer=responses.uses_visitor_log),
+    ]
+    db.add_all(db_items)
+    db.commit()
+    return {"message": f"Successfully saved Category 1 responses for farm {responses.farm_id}"}
 
-# ... (all your existing save_category functions are here) ...
+# --- CATEGORY 2 SAVE FUNCTION ---
+def save_category2_responses(db: Session, responses: schemas.AssessmentCategory2):
+    db_items = [
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_all_in_all_out", answer=responses.is_all_in_all_out),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_quarantine_used", answer=responses.is_quarantine_used),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="are_ages_separated", answer=responses.are_ages_separated),
+    ]
+    db.add_all(db_items)
+    db.commit()
+    return {"message": f"Successfully saved Category 2 responses for farm {responses.farm_id}"}
 
+# --- CATEGORY 3 SAVE FUNCTION ---
+def save_category3_responses(db: Session, responses: schemas.AssessmentCategory3):
+    db_items = [
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_feed_secure", answer=responses.is_feed_secure),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_water_source_safe", answer=responses.is_water_source_safe),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_equipment_shared", answer=responses.is_equipment_shared),
+    ]
+    db.add_all(db_items)
+    db.commit()
+    return {"message": f"Successfully saved Category 3 responses for farm {responses.farm_id}"}
 
-# --- NEW SCORING LOGIC (PART 2: CALCULATION FUNCTION) ---
+# --- CATEGORY 4 SAVE FUNCTION ---
+def save_category4_responses(db: Session, responses: schemas.AssessmentCategory4):
+    db_items = [
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_disposal_approved", answer=responses.is_disposal_approved),
+        models.AssessmentResponse(farm_id=responses.farm_id, question_id="is_waste_contained", answer=responses.is_waste_contained),
+    ]
+    db.add_all(db_items)
+    db.commit()
+    return {"message": f"Successfully saved Category 4 responses for farm {responses.farm_id}"}
+
+# --- SCORING CALCULATION FUNCTION ---
 def calculate_risk_score(db: Session, farm_id: str):
-    # Get all responses for this farm from the database
     responses = db.query(models.AssessmentResponse).filter(models.AssessmentResponse.farm_id == farm_id).all()
     
     if not responses:
@@ -56,19 +94,15 @@ def calculate_risk_score(db: Session, farm_id: str):
         "Waste & Mortality Disposal": 0
     }
 
-    # Calculate the score
     for response in responses:
-        # If the answer is False, it's a risk. Add points.
         if response.answer is False:
             points = RISK_WEIGHTS.get(response.question_id, 0)
             total_score += points
             
-            # Add points to the specific category for weakness ranking
             category = QUESTION_TO_CATEGORY.get(response.question_id)
             if category:
                 category_scores[category] += points
 
-    # Determine risk level
     if total_score <= 20:
         risk_level = "Low"
     elif total_score <= 50:
@@ -76,12 +110,11 @@ def calculate_risk_score(db: Session, farm_id: str):
     else:
         risk_level = "High"
 
-    # Find the categories with the highest scores (the biggest weaknesses)
     sorted_weaknesses = sorted(category_scores.items(), key=lambda item: item[1], reverse=True)
     top_weaknesses = [category for category, score in sorted_weaknesses if score > 0]
 
     return {
         "total_score": total_score,
         "risk_level": risk_level,
-        "top_weaknesses": top_weaknesses[:3] # Return the top 3 weaknesses
+        "top_weaknesses": top_weaknesses[:3]
     }
