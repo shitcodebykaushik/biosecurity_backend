@@ -1,4 +1,6 @@
-
+Digital Record-Keeping & Compliance
+# Module 1 - Risk Self-Assessment module.
+- Here we are collecting the data and store it in db then analyze the rist  and provide the insight of it .
 # Endpoint 1
 - `http://127.0.0.1:8000/assessment/category1`
 Payload  {
@@ -33,12 +35,36 @@ http://127.0.0.1:8000/assessment/category3
 
 # Endpoint 4 
 http://127.0.0.1:8000/assessment/category4
-
+- Payload
 {
   "farm_id": "FARM_LUD_001",
   "is_disposal_approved": false,
   "is_waste_contained": true
 }
+# Module 2 Digital Record-Keeping and Compliance Tracking Module.
+# Endpoint 1
+http://127.0.0.1:8000/compliance/log/visitor
+- Payload
+{
+  "farm_id": "FARM_LUD_001",
+  "details": "Visitor: Dr. Sharma (Vet), Vehicle: PB 10 XY 5678, Purpose: Health Checkup"
+}
 
+# Endpoint 2
 
-# Endpoint 5
+http://127.0.0.1:8000/compliance/log/mortality
+- Payload
+{
+  "farm_id": "FARM_LUD_001",
+  "count": 3,
+  "details": "Observed in Shed-B, no other symptoms"
+}
+
+# Endpoint 3
+
+POST http://127.0.0.1:8000//compliance/log/task-completion
+-Payload
+{
+  "farm_id": "FARM_XYZ_999",
+  "details": "This will fail."
+}
